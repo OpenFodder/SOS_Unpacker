@@ -235,8 +235,8 @@ int main(int argc, char* argv[])
             TrackDecodedBuffer.push_back(NewData);
         }
 
-        if (Checksum)
-            return -1;
+        //if (Checksum)
+        //    return -1;
 
         // Track CRC Matches
         byte* TrackData = (byte*) TrackDecodedBuffer.data();
@@ -257,7 +257,7 @@ int main(int argc, char* argv[])
     // Move to first file entry
     TrackPtr += 0x20;
     for (UDWORD Count = 0; Count < FileCount; ++Count) {
-        std::string Filename((char*)TrackPtr, 0xA);
+        std::string Filename((char*)TrackPtr);
         UDWORD Filesize = readDWord(TrackPtr + 0x1C);
 
         UBYTE FileTrack = *(TrackPtr + 0x1A);
@@ -281,7 +281,7 @@ int main(int argc, char* argv[])
         FileData.resize(Filesize);
         std::ofstream outfile;
         outfile.open(Filename, std::ios_base::out | std::ios::binary);
-        outfile.write((char*)FileData.data(), FileData.size());
+        outfile.write( (char*)FileData.data(), FileData.size());
         outfile.close();
 
         // Next File
