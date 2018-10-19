@@ -18,10 +18,10 @@
     <ClCompile Include="capsplug.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CLP.cpp">
+    <ClCompile Include="StdAfx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="StdAfx.cpp">
+    <ClCompile Include="SOS_Unpacker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
