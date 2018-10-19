@@ -10,4 +10,5 @@ Place your .raw files in the directory with the executable, execute, and all fil
 
 ## Thanks
 
+Kryoflux, for such an execellent tool
 Wepl for the SOS format (WHDLoad CannonSoccer Install Source)
