@@ -1,7 +1,3 @@
-#ifndef CAPSPLUG_H
-#define CAPSPLUG_H
-
-#ifdef __cplusplus
 
 // library function pointers
 struct CapsProc {
@@ -11,9 +7,6 @@ struct CapsProc {
 
 typedef SDWORD (__cdecl *CAPSHOOKN)(...);
 typedef PCHAR  (__cdecl *CAPSHOOKS)(...);
-
-extern "C" {
-#endif
 
 SDWORD CapsInit(LPCTSTR lib);
 SDWORD CapsExit();
@@ -34,9 +27,3 @@ SDWORD CAPSSetRevolution(SDWORD id, UDWORD value);
 SDWORD CAPSGetImageType(PCHAR name);
 SDWORD CAPSGetImageTypeMemory(PUBYTE buffer, UDWORD length);
 SDWORD CAPSGetDebugRequest();
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif
