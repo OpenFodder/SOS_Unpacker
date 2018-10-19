@@ -4,9 +4,11 @@ Unpack files protected by Sensible Operating System disk protection from disks i
 
 ![SOS_Unpacker](https://user-images.githubusercontent.com/1327406/47247552-22232180-d450-11e8-948c-487ec32b5258.png)
 
-## How-To
+## How-To Use
 
-Place your .raw files in the directory with the executable, execute, and all files will be extracted to the current directory.
+1. Place your .raw disk images in the directory with the executable
+2. Execute SOS_Unpacker
+3. All files are extracted to the "out" directory
 
 ## Thanks
 
