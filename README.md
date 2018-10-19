@@ -2,7 +2,7 @@
 
 Unpack files protected by Sensible Operating System disk protection from disks imaged in the [Kryoflux "CT RAW"](https://blog.legacymode.com/2018/09/09/floppy-disk-archiving/) format.
 
-![SOS_Unpacker](https://user-images.githubusercontent.com/1327406/47247552-22232180-d450-11e8-948c-487ec32b5258.png)
+![SOS_Unpacker](https://user-images.githubusercontent.com/1327406/47248575-0b33fd80-d457-11e8-81f2-32783e070881.png)
 
 ## How-To Use
 
