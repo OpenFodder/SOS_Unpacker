@@ -19,9 +19,6 @@
 #include "windows.h"
 #include "CapsPlug.h"
 
-//#define CAPS_USER
-//#include "CapsLib.h"
-
 HMODULE capi=NULL;
 
 CapsProc cpr[]= {
@@ -46,10 +43,8 @@ CapsProc cpr[]= {
 	NULL, NULL
 };
 
-
 // start caps image support
-SDWORD CapsInit(LPCTSTR lib)
-{
+SDWORD CapsInit(LPCTSTR lib) {
 	if (capi)
 		return imgeOk;
 
@@ -66,8 +61,7 @@ SDWORD CapsInit(LPCTSTR lib)
 }
 
 // stop caps image support
-SDWORD CapsExit()
-{
+SDWORD CapsExit() {
 	SDWORD res=cpr[1].proc ? CAPSHOOKN(cpr[1].proc)() : imgeUnsupported;
 
 	if (capi) {
@@ -82,88 +76,77 @@ SDWORD CapsExit()
 }
 
 // add image container
-SDWORD CapsAddImage()
-{
+SDWORD CapsAddImage() {
 	SDWORD res=cpr[2].proc ? CAPSHOOKN(cpr[2].proc)() : -1;
 
 	return res;
 }
 
 // delete image container
-SDWORD CapsRemImage(SDWORD id)
-{
+SDWORD CapsRemImage(SDWORD id) {
 	SDWORD res=cpr[3].proc ? CAPSHOOKN(cpr[3].proc)(id) : -1;
 
 	return res;
 }
 
 // lock image
-SDWORD CapsLockImage(SDWORD id, PCHAR name)
-{
+SDWORD CapsLockImage(SDWORD id, PCHAR name) {
 	SDWORD res=cpr[4].proc ? CAPSHOOKN(cpr[4].proc)(id, name) : imgeUnsupported;
 
 	return res;
 }
 
 // unlock image
-SDWORD CapsUnlockImage(SDWORD id)
-{
+SDWORD CapsUnlockImage(SDWORD id) {
 	SDWORD res=cpr[5].proc ? CAPSHOOKN(cpr[5].proc)(id) : imgeUnsupported;
 
 	return res;
 }
 
 // load and decode complete image
-SDWORD CapsLoadImage(SDWORD id, UDWORD flag)
-{
+SDWORD CapsLoadImage(SDWORD id, UDWORD flag) {
 	SDWORD res=cpr[6].proc ? CAPSHOOKN(cpr[6].proc)(id, flag) : imgeUnsupported;
 
 	return res;
 }
 
 // get image information
-SDWORD CapsGetImageInfo(PCAPSIMAGEINFO pi, SDWORD id)
-{
+SDWORD CapsGetImageInfo(PCAPSIMAGEINFO pi, SDWORD id) {
 	SDWORD res=cpr[7].proc ? CAPSHOOKN(cpr[7].proc)(pi, id) : imgeUnsupported;
 
 	return res;
 }
 
 // load and decode track, or return with the cache
-SDWORD CapsLockTrack(PCAPSTRACKINFO pi, SDWORD id, UDWORD cylinder, UDWORD head, UDWORD flag)
-{
+SDWORD CapsLockTrack(PCAPSTRACKINFO pi, SDWORD id, UDWORD cylinder, UDWORD head, UDWORD flag) {
 	SDWORD res=cpr[8].proc ? CAPSHOOKN(cpr[8].proc)(pi, id, cylinder, head, flag) : imgeUnsupported;
 
 	return res;
 }
 
 // remove track from cache
-SDWORD CapsUnlockTrack(SDWORD id, UDWORD cylinder, UDWORD head)
-{
+SDWORD CapsUnlockTrack(SDWORD id, UDWORD cylinder, UDWORD head) {
 	SDWORD res=cpr[9].proc ? CAPSHOOKN(cpr[9].proc)(id, cylinder, head) : imgeUnsupported;
 
 	return res;
 }
 
 // remove all tracks from cache
-SDWORD CapsUnlockAllTracks(SDWORD id)
-{
+SDWORD CapsUnlockAllTracks(SDWORD id) {
 	SDWORD res=cpr[10].proc ? CAPSHOOKN(cpr[10].proc)(id) : imgeUnsupported;
 
 	return res;
 }
 
 // get platform name
-PCHAR CapsGetPlatformName(UDWORD pid)
-{
+PCHAR CapsGetPlatformName(UDWORD pid) {
 	PCHAR res=cpr[11].proc ? CAPSHOOKS(cpr[11].proc)(pid) : NULL;
 
 	return res;
 }
 
 // lock memory mapped image
-SDWORD CapsLockImageMemory(SDWORD id, PUBYTE buffer, UDWORD length, UDWORD flag)
-{
+SDWORD CapsLockImageMemory(SDWORD id, PUBYTE buffer, UDWORD length, UDWORD flag) {
 	SDWORD res=cpr[12].proc ? CAPSHOOKN(cpr[12].proc)(id, buffer, length, flag) : imgeUnsupported;
 
 	return res;

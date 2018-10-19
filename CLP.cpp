@@ -3,11 +3,11 @@
 // www.caps-project.org
 
 #include "stdafx.h"
+#include "windows.h"
 
 #include "ComType.h"
 #include "CapsAPI.h"
 
-#include "windows.h"
 #include "CapsPlug.h"
 
 #include <iostream>
@@ -17,6 +17,7 @@
 #include <map>
 
 static int caps_flags = DI_LOCK_DENVAR | DI_LOCK_DENNOISE | DI_LOCK_NOISE | DI_LOCK_UPDATEFD | DI_LOCK_TYPE | DI_LOCK_OVLBIT | DI_LOCK_TRKBIT;
+const UWORD gTrackSyncMarker = 0x4489;
 
 UWORD readLEWord(const void *buffer) {
     const UWORD *wordBytes = (const UWORD *)buffer;
@@ -38,7 +39,7 @@ UDWORD readDWord(const void *buffer) {
     return (dwordNext[0] << 24) + (dwordNext[1] << 16) + (dwordNext[2] << 8) + (dwordNext[3]);
 }
 
-UDWORD	swapDWord(UDWORD buffer) {
+UDWORD swapDWord(UDWORD buffer) {
     const UWORD *DW = (UWORD*)&buffer;
     return (DW[0] << 16) + (DW[1]);
 }
@@ -47,9 +48,7 @@ void trackbuffer_shift_bits(byte **pBuffer, int d0, int d1) {
     d0 -= 1;
     if (d0 >= 0) {
         byte *buffer = *pBuffer;
-
         buffer += d1; buffer += d1;
-
         d1 -= 2;
 
         do {
@@ -60,34 +59,29 @@ void trackbuffer_shift_bits(byte **pBuffer, int d0, int d1) {
             --a3;
             if (*a3 & 0x8000)
                 extend = true;
-
             *a3 <<= 1;
 
             do {
                 bool extend2 = false;
-
                 --a3;
                 if (*a3 & 0x8000)
                     extend2 = true;
-
                 *a3 <<= 1;
 
                 if (extend)
                     *a3 |= 0x01;
                 extend = extend2;
-
             } while (--d2 >= 0);
 
         } while (--d0 >= 0);
     }
 
-    d0 = 0x4489;
-    while (d0 == readLEWord(*pBuffer))
+    // Skip past SYNC marker
+    while (readLEWord(*pBuffer) == gTrackSyncMarker)
         *pBuffer += 2;
 }
 
 int sectorFindSync(byte **pBuffer, byte *pBufferEnd) {
-    const	UWORD syncValue = 0x4489;
 
     UDWORD	d0 = 0, d7 = 0;
     bool	found = false;
@@ -97,7 +91,7 @@ int sectorFindSync(byte **pBuffer, byte *pBufferEnd) {
 
         for (d7 = 0; d7 != 0x10; ++d7) {
 
-            if (syncValue == (UWORD)d0) {
+            if (gTrackSyncMarker == (UWORD)d0) {
                 found = true;
                 break;
             }
@@ -124,8 +118,7 @@ int sectorFindSync(byte **pBuffer, byte *pBufferEnd) {
     return d0;
 }
 
-static void mfmcopy(UINT16 *mfm, UINT8 *data, int len)
-{
+void mfmcopy(UINT16 *mfm, UINT8 *data, int len) {
     int memlen = (len + 7) / 8;
     for (int i = 0; i < memlen; i += 2) {
         if (i + 1 < memlen)
@@ -162,63 +155,71 @@ void tool_EndianSwap(UINT8 *pBuffer, size_t pSize) {
     }
 }
 
-int main(int argc, char* argv[])
-{
-	CapsInit("CAPSImg.dll");
+std::vector<std::string> GetSOSTracks(const std::string& pFilename) {
+    CapsImageInfo CapsImageInfo;
 
-	int img=CapsAddImage();
+    int CapsID = CapsAddImage();
 
-	// lock this image into the container
-	auto ret = CapsLockImage(img, argv[1]);
+    // lock this image into the container
+    auto ret = CapsLockImage(CapsID, (PCHAR) pFilename.c_str());
     if (ret != imgeOk) {
-        return -1;
+        CapsRemImage(CapsID);
+        return {};
     }
 
-	// get some information about the image
-	CapsImageInfo ci;
-	CapsGetImageInfo(&ci, img);
-    auto MaxTracks = (ci.maxcylinder - ci.mincylinder + 1) * (ci.maxhead - ci.minhead + 1);
+    // get some information about the image
+    CapsGetImageInfo(&CapsImageInfo, CapsID);
+    CapsLoadImage(CapsID, caps_flags);
 
-	CapsLoadImage(img, caps_flags);
-
-    CapsTrackInfoT2 ti;
+    auto MaxTracks = (CapsImageInfo.maxcylinder - CapsImageInfo.mincylinder + 1) *  (CapsImageInfo.maxhead - CapsImageInfo.minhead + 1);
 
     std::vector<std::string> TrackBuffers;
     TrackBuffers.resize(MaxTracks);
 
-    // Track 2
-    for (size_t Track = 2; Track < MaxTracks; ++Track) {
-        std::string Full;
+    // Track 0 is standard Amiga DOS
+    // Track 1 is unformatted
+    // Track 2 is the first SOS track
+    for (UDWORD Track = 2; Track < MaxTracks; ++Track) {
 
-        ti.type = ctitNoise;
+        CapsTrackInfoT2 TrackInfo;
+        TrackInfo.type = ctitNoise;
 
-        size_t Side = 1;
+        // SOS has the sides inverted
+        UDWORD Head = 1;
         if ((Track & 1))
-            Side = 0;
+            Head = 0;
 
-        auto Data = CapsLockTrack((PCAPSTRACKINFO)&ti, img, Track / 2, Side, caps_flags);
+        auto Data = CapsLockTrack((PCAPSTRACKINFO)&TrackInfo, CapsID, Track / 2, Head, caps_flags);
+        std::string Full;
+        Full.resize(TrackInfo.tracklen / 8);
+        mfmcopy((UINT16*)Full.data(), TrackInfo.trackbuf, TrackInfo.tracklen);
 
-        Full.resize(ti.tracklen / 8);
-        mfmcopy((UINT16*) Full.data(), ti.trackbuf, ti.tracklen);
+        byte* Ptr = (byte*)Full.data();
+        byte* PtrEnd = (byte*)Full.data() + Full.size();
 
-        byte* Ptr = (byte*) Full.data();
-        byte* PtrEnd = (byte*) Full.data() + Full.size();
-
-        auto c = sectorFindSync(&Ptr, Ptr + Full.size());
-        trackbuffer_shift_bits(&Ptr, c, (PtrEnd - Ptr) / 2 - 8);
-
-        byte* PtrOdd = Ptr + 0x180c;
-        if (PtrOdd > PtrEnd)
-            continue;
-
-        SDWORD Checksum = getlw((UDWORD*) Ptr, (UDWORD*) PtrOdd);
-        Ptr += 4; PtrOdd += 4;
-        // Check for Sensible Software marker
-        if (swapDWord(Checksum) != 'SOS6') {
+        // Find the track start marker
+        auto SkipBits = sectorFindSync(&Ptr, Ptr + Full.size());
+        if (SkipBits == -1) {
+            std::cout << "Skipping Track " << Track << " (SYNC not found)\n";
             continue;
         }
-        
-        Checksum = -swapDWord(Checksum);
+        trackbuffer_shift_bits(&Ptr, SkipBits, (int)((PtrEnd - Ptr) / 2) - 8);
+
+        byte* PtrOdd = Ptr + 0x180c;
+        if (PtrOdd > PtrEnd) {
+            std::cout << "Skipping Track " << Track << "\n";
+            continue;
+        }
+        SDWORD Checksum = getlw((UDWORD*)Ptr, (UDWORD*)PtrOdd);
+        Ptr += 4; PtrOdd += 4;
+
+        // Check for Sensible Software marker
+        if (swapDWord(Checksum) != 'SOS6') {
+            std::cout << "Skipping Track " << Track << " (Invalid SOS6 Marker)\n";
+            continue;
+        }
+        Checksum = -((SDWORD)swapDWord(Checksum));
+
         SDWORD data = getlw((UDWORD*)Ptr, (UDWORD*)PtrOdd);
         Ptr += 4; PtrOdd += 4;
         Checksum += swapDWord(data);
@@ -235,24 +236,28 @@ int main(int argc, char* argv[])
             TrackDecodedBuffer.push_back(NewData);
         }
 
-        //if (Checksum)
-        //    return -1;
+        if (Checksum) {
+            std::cout << "Track " << Track << " has invalid checksum.\n";
+        }
 
         // Track CRC Matches
-        byte* TrackData = (byte*) TrackDecodedBuffer.data();
+        byte* TrackData = (byte*)TrackDecodedBuffer.data();
         tool_EndianSwap(TrackData, TrackDecodedBuffer.size() * 4);
         TrackBuffers[Track] = std::string((char*)TrackData, TrackDecodedBuffer.size() * 4);
     }
 
-	CapsUnlockAllTracks(img);
-	CapsUnlockImage(img);
-	CapsRemImage(img);
-	CapsExit();
+    CapsUnlockAllTracks(CapsID);
+    CapsUnlockImage(CapsID);
+    CapsRemImage(CapsID);
 
-    byte* TrackPtr = (byte*)TrackBuffers[2].data();
+    return TrackBuffers;
+}
+#include<iomanip>
+void ExtractFiles(const std::vector<std::string> pTrackBuffers, const std::string& pTargetFolder) {
 
+    // Track3 is the directory listing
+    byte* TrackPtr = (byte*)pTrackBuffers[2].data();
     UDWORD FileCount = readDWord(TrackPtr + 0x18);
-
 
     // Move to first file entry
     TrackPtr += 0x20;
@@ -265,11 +270,21 @@ int main(int argc, char* argv[])
 
         std::string FileData;
 
+        std::cout << std::setw(15) << Filename << "  Track: ";
+        std::cout << std::setw(4) << ((size_t)FileTrack) << "  Block: ";
+        std::cout << std::setw(3) << ((size_t)FileBlock) << "  Size: ";
+        std::cout << std::setw(6) << ((size_t)Filesize) << " bytes\n";
+
         SDWORD FileRemaining = Filesize;
         while (FileRemaining > 0) {
-            byte* FileTrackPtr = (byte*)TrackBuffers[FileTrack].data();
+            byte* FileTrackPtr = (byte*)pTrackBuffers[FileTrack].data();
+            byte *FileTrackPtrEnd = (byte*)pTrackBuffers[FileTrack].data() + pTrackBuffers[FileTrack].size();
             FileTrackPtr += (FileBlock * 512);
 
+            if (FileTrackPtr > FileTrackPtrEnd || FileTrackPtr + 510 >= FileTrackPtrEnd) {
+                std::cout << "  Track: " << ((size_t)FileTrack) << ": Read past end of available track data.\n\n";
+                break;
+            }
             FileData.append((char*)FileTrackPtr, 510);
             FileRemaining -= 510;
             FileTrackPtr += 510;
@@ -278,15 +293,45 @@ int main(int argc, char* argv[])
             FileBlock = *FileTrackPtr++;
         }
 
+        // Truncate to actual file size
         FileData.resize(Filesize);
+
         std::ofstream outfile;
-        outfile.open(Filename, std::ios_base::out | std::ios::binary);
-        outfile.write( (char*)FileData.data(), FileData.size());
+        outfile.open(pTargetFolder + "//" + Filename, std::ios_base::out | std::ios::binary);
+        outfile.write((char*)FileData.data(), FileData.size());
         outfile.close();
 
         // Next File
         TrackPtr += 0x20;
     }
+}
 
+int main(int argc, char* argv[])
+{
+	CapsInit("CAPSImg.dll");
+
+    auto Files = local_DirectoryList(".", ".raw");
+
+    if(!Files.size())
+        std::cout << "No .raw files found\n";
+
+    //local_DirectoryList
+    for (auto& File : Files) {
+        std::cout << "\nLoading " << File << "\n";
+        auto Tracks = GetSOSTracks(File);
+
+        if (!Tracks.size()) {
+            std::cout << "No Tracks found in file: " << File << "\n";
+            continue;
+        }
+
+        std::cout << "Extracting...\n";
+        ExtractFiles(Tracks, "out");
+    }
+
+    std::cout << "Press enter to finish\n";
+    std::cin.get();
+
+    CapsExit();
 	return 0;
 }
