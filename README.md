@@ -12,5 +12,5 @@ Unpack files protected by Sensible Operating System disk protection from disks i
 
 ## Thanks
 
-Kryoflux, for such an execellent tool
+Kryoflux, for such an execellent tool  
 Wepl for the SOS format (WHDLoad CannonSoccer Install Source)
