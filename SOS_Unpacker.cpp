@@ -11,6 +11,7 @@
 #include "CapsPlug.h"
 
 #include <iostream>
+#include <iomanip>
 #include <string>
 #include <vector>
 #include <fstream>
@@ -18,9 +19,19 @@
 
 const char gPathSeperator = (_WIN32 ? '\\' : '/');
 
-static int caps_flags = DI_LOCK_DENVAR | DI_LOCK_DENNOISE | DI_LOCK_NOISE | DI_LOCK_UPDATEFD | DI_LOCK_TYPE | DI_LOCK_OVLBIT | DI_LOCK_TRKBIT;
+const int gCapsFlags = DI_LOCK_DENVAR | DI_LOCK_DENNOISE | DI_LOCK_NOISE | DI_LOCK_UPDATEFD | DI_LOCK_TYPE | DI_LOCK_OVLBIT | DI_LOCK_TRKBIT;
 const UWORD gTrackSyncMarker = 0x4489;
 
+inline UWORD readBEWord(const void *buffer) {
+    const UBYTE* bytes = (const UBYTE*)buffer;
+    return UWORD((bytes[0] << 8) + bytes[1]);
+}
+
+inline UDWORD readBEDWord(const void *buffer) {
+    const UBYTE* bytes = (const UBYTE*)buffer;
+
+    return UDWORD((bytes[0] << 24) + (bytes[1] << 16) + (bytes[2] << 8) + (bytes[3]));
+}
 UWORD readLEWord(const void *buffer) {
     const UWORD *wordBytes = (const UWORD *)buffer;
     return *wordBytes;
@@ -29,11 +40,6 @@ UWORD readLEWord(const void *buffer) {
 UDWORD	readLEDWord(const void *buffer) {
     const UDWORD *dwordBytes = (const UDWORD *)buffer;
     return *dwordBytes;
-}
-
-UWORD readWord(const void *buffer) {
-    const byte *byteNext = (const byte *)buffer;
-    return (byteNext[0] << 8) + byteNext[1];
 }
 
 UDWORD readDWord(const void *buffer) {
@@ -84,40 +90,30 @@ void trackbuffer_shift_bits(byte **pBuffer, int d0, int d1) {
 }
 
 int sectorFindSync(byte **pBuffer, byte *pBufferEnd) {
-
-    UDWORD	d0 = 0, d7 = 0;
+    UDWORD	bits_shifted = 0;
     bool	found = false;
 
-    for (;;) {
-        d0 = swapDWord(readLEDWord(*pBuffer));
+    for (; *pBuffer < pBufferEnd && !found; *pBuffer += 2) {
+        UDWORD current = swapDWord(readLEDWord(*pBuffer));
 
-        for (d7 = 0; d7 != 0x10; ++d7) {
-
-            if (gTrackSyncMarker == (UWORD)d0) {
+        for (bits_shifted = 0; bits_shifted < 16; ++bits_shifted) {
+            if (gTrackSyncMarker == (UWORD)current) {
                 found = true;
                 break;
             }
-
-            d0 >>= 1;
+            current >>= 1;
         }
-
-        if (found)
-            break;
-
-        *pBuffer += 2;
-        if (*pBuffer >= pBufferEnd)
-            return -1;
     }
 
-    // 990E
-    d0 = 0x10;
-    d0 -= d7;
-    if (d0 == 0x10) {
-        *pBuffer += 2;
-        d0 = 0;
-    }
+    if (*pBuffer >= pBufferEnd)
+        return -1;
 
-    return d0;
+    // track begins on next word boundry
+    if (!bits_shifted)
+        *pBuffer += 2;
+
+    // Calculate number of bits shifted
+    return (16 - bits_shifted);
 }
 
 void mfmcopy(UINT16 *mfm, UINT8 *data, int len) {
@@ -130,7 +126,7 @@ void mfmcopy(UINT16 *mfm, UINT8 *data, int len) {
     }
 }
 
-UDWORD getlw(UDWORD *pEven, UDWORD* pOdd) {
+UDWORD sos_ReadUDWord(UDWORD *pEven, UDWORD* pOdd) {
     UDWORD D0 = *pEven;
     UDWORD D1 = *pOdd;
 
@@ -171,7 +167,7 @@ std::vector<std::string> GetSOSTracks(const std::string& pFilename) {
 
     // get some information about the image
     CapsGetImageInfo(&CapsImageInfo, CapsID);
-    CapsLoadImage(CapsID, caps_flags);
+    CapsLoadImage(CapsID, gCapsFlags);
 
     auto MaxTracks = (CapsImageInfo.maxcylinder - CapsImageInfo.mincylinder + 1) *  (CapsImageInfo.maxhead - CapsImageInfo.minhead + 1);
 
@@ -182,25 +178,21 @@ std::vector<std::string> GetSOSTracks(const std::string& pFilename) {
     // Track 1 is unformatted
     // Track 2 is the first SOS track
     for (UDWORD Track = 2; Track < MaxTracks; ++Track) {
-
+        std::string FullTrack;
         CapsTrackInfoT2 TrackInfo;
         TrackInfo.type = ctitNoise;
 
         // SOS has the sides inverted
-        UDWORD Head = 1;
-        if ((Track & 1))
-            Head = 0;
+        auto Data = CapsLockTrack((PCAPSTRACKINFO)&TrackInfo, CapsID, Track / 2, (Track & 1) ? 0 : 1, gCapsFlags);
+        
+        FullTrack.resize(TrackInfo.tracklen / 8);
+        mfmcopy((UINT16*)FullTrack.data(), TrackInfo.trackbuf, TrackInfo.tracklen);
 
-        auto Data = CapsLockTrack((PCAPSTRACKINFO)&TrackInfo, CapsID, Track / 2, Head, caps_flags);
-        std::string Full;
-        Full.resize(TrackInfo.tracklen / 8);
-        mfmcopy((UINT16*)Full.data(), TrackInfo.trackbuf, TrackInfo.tracklen);
-
-        byte* Ptr = (byte*)Full.data();
-        byte* PtrEnd = (byte*)Full.data() + Full.size();
+        byte* Ptr = (byte*)FullTrack.data();
+        byte* PtrEnd = (byte*)FullTrack.data() + FullTrack.size();
 
         // Find the track start marker
-        auto SkipBits = sectorFindSync(&Ptr, Ptr + Full.size());
+        auto SkipBits = sectorFindSync(&Ptr, Ptr + FullTrack.size());
         if (SkipBits == -1) {
             std::cout << "Skipping Track " << Track << " (SYNC not found)\n";
             continue;
@@ -212,7 +204,7 @@ std::vector<std::string> GetSOSTracks(const std::string& pFilename) {
             std::cout << "Skipping Track " << Track << "\n";
             continue;
         }
-        SDWORD Checksum = getlw((UDWORD*)Ptr, (UDWORD*)PtrOdd);
+        SDWORD Checksum = sos_ReadUDWord((UDWORD*)Ptr, (UDWORD*)PtrOdd);
         Ptr += 4; PtrOdd += 4;
 
         // Check for Sensible Software marker
@@ -222,17 +214,17 @@ std::vector<std::string> GetSOSTracks(const std::string& pFilename) {
         }
         Checksum = -((SDWORD)swapDWord(Checksum));
 
-        SDWORD data = getlw((UDWORD*)Ptr, (UDWORD*)PtrOdd);
+        SDWORD data = sos_ReadUDWord((UDWORD*)Ptr, (UDWORD*)PtrOdd);
         Ptr += 4; PtrOdd += 4;
         Checksum += swapDWord(data);
 
-        data = getlw((UDWORD*)Ptr, (UDWORD*)PtrOdd);
+        data = sos_ReadUDWord((UDWORD*)Ptr, (UDWORD*)PtrOdd);
         Ptr += 4; PtrOdd += 4;
         Checksum -= swapDWord(data);
 
         std::vector<UDWORD> TrackDecodedBuffer;
         for (int count = 0x1800 / 4 - 1; count >= 0; --count) {
-            UDWORD NewData = getlw((UDWORD*)Ptr, (UDWORD*)PtrOdd);
+            UDWORD NewData = sos_ReadUDWord((UDWORD*)Ptr, (UDWORD*)PtrOdd);
             Ptr += 4; PtrOdd += 4;
             Checksum -= swapDWord(NewData);
             TrackDecodedBuffer.push_back(NewData);
@@ -254,7 +246,7 @@ std::vector<std::string> GetSOSTracks(const std::string& pFilename) {
 
     return TrackBuffers;
 }
-#include<iomanip>
+
 void ExtractFiles(const std::vector<std::string> pTrackBuffers, const std::string& pTargetFolder) {
 
     // Track3 is the directory listing
