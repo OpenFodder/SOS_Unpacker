@@ -42,11 +42,6 @@ UDWORD	readLEDWord(const void *buffer) {
     return *dwordBytes;
 }
 
-UDWORD readDWord(const void *buffer) {
-    const byte *dwordNext = (const byte *)buffer;
-    return (dwordNext[0] << 24) + (dwordNext[1] << 16) + (dwordNext[2] << 8) + (dwordNext[3]);
-}
-
 UDWORD swapDWord(UDWORD buffer) {
     const UWORD *DW = (UWORD*)&buffer;
     return (DW[0] << 16) + (DW[1]);
@@ -97,7 +92,7 @@ int sectorFindSync(byte **pBuffer, byte *pBufferEnd) {
         UDWORD current = swapDWord(readLEDWord(*pBuffer));
 
         for (bits_shifted = 0; bits_shifted < 16; ++bits_shifted) {
-            if (gTrackSyncMarker == (UWORD)current) {
+            if (gTrackSyncMarker == (current & 0xFFFF)) {
                 found = true;
                 break;
             }
@@ -116,27 +111,20 @@ int sectorFindSync(byte **pBuffer, byte *pBufferEnd) {
     return (16 - bits_shifted);
 }
 
-void mfmcopy(UINT16 *mfm, UINT8 *data, int len) {
-    int memlen = (len + 7) / 8;
-    for (int i = 0; i < memlen; i += 2) {
-        if (i + 1 < memlen)
-            *mfm++ = (data[i] << 8) + data[i + 1];
-        else
-            *mfm++ = (data[i] << 8);
-    }
-}
+UDWORD sos_ReadUDWord(byte*&pEven, byte*& pOdd) {
+    UDWORD D0 = *(UDWORD*)pEven;
+    UDWORD D1 = *(UDWORD*)pOdd;
 
-UDWORD sos_ReadUDWord(UDWORD *pEven, UDWORD* pOdd) {
-    UDWORD D0 = *pEven;
-    UDWORD D1 = *pOdd;
+    pEven += 4;
+    pOdd += 4;
 
     D0 &= 0x55555555;
     D1 &= 0x55555555;
 
-    D1 += D1;
+    D1 <<= 1;
     D0 += D1;
 
-    return D0;
+    return swapDWord(D0);
 }
 
 void tool_EndianSwap(UINT8 *pBuffer, size_t pSize) {
@@ -186,7 +174,8 @@ std::vector<std::string> GetSOSTracks(const std::string& pFilename) {
         auto Data = CapsLockTrack((PCAPSTRACKINFO)&TrackInfo, CapsID, Track / 2, (Track & 1) ? 0 : 1, gCapsFlags);
         
         FullTrack.resize(TrackInfo.tracklen / 8);
-        mfmcopy((UINT16*)FullTrack.data(), TrackInfo.trackbuf, TrackInfo.tracklen);
+        memcpy((UINT16*)FullTrack.data(), TrackInfo.trackbuf, TrackInfo.tracklen / 8);
+        tool_EndianSwap((UINT8*)FullTrack.data(), FullTrack.size());
 
         byte* Ptr = (byte*)FullTrack.data();
         byte* PtrEnd = (byte*)FullTrack.data() + FullTrack.size();
@@ -204,30 +193,22 @@ std::vector<std::string> GetSOSTracks(const std::string& pFilename) {
             std::cout << "Skipping Track " << Track << "\n";
             continue;
         }
-        SDWORD Checksum = sos_ReadUDWord((UDWORD*)Ptr, (UDWORD*)PtrOdd);
-        Ptr += 4; PtrOdd += 4;
+        SDWORD Checksum = sos_ReadUDWord(Ptr, PtrOdd);
 
         // Check for Sensible Software marker
-        if (swapDWord(Checksum) != 'SOS6') {
+        if (Checksum != 'SOS6') {
             std::cout << "Skipping Track " << Track << " (Invalid SOS6 Marker)\n";
             continue;
         }
-        Checksum = -((SDWORD)swapDWord(Checksum));
-
-        SDWORD data = sos_ReadUDWord((UDWORD*)Ptr, (UDWORD*)PtrOdd);
-        Ptr += 4; PtrOdd += 4;
-        Checksum += swapDWord(data);
-
-        data = sos_ReadUDWord((UDWORD*)Ptr, (UDWORD*)PtrOdd);
-        Ptr += 4; PtrOdd += 4;
-        Checksum -= swapDWord(data);
+        Checksum = -Checksum;
+        Checksum += sos_ReadUDWord(Ptr, PtrOdd);
+        Checksum -= sos_ReadUDWord(Ptr, PtrOdd);
 
         std::vector<UDWORD> TrackDecodedBuffer;
         for (int count = 0x1800 / 4 - 1; count >= 0; --count) {
-            UDWORD NewData = sos_ReadUDWord((UDWORD*)Ptr, (UDWORD*)PtrOdd);
-            Ptr += 4; PtrOdd += 4;
-            Checksum -= swapDWord(NewData);
-            TrackDecodedBuffer.push_back(NewData);
+            UDWORD NewData = sos_ReadUDWord(Ptr, PtrOdd);
+            Checksum -= NewData;
+            TrackDecodedBuffer.push_back(swapDWord(NewData));
         }
 
         if (Checksum) {
@@ -251,31 +232,30 @@ void ExtractFiles(const std::vector<std::string> pTrackBuffers, const std::strin
 
     // Track3 is the directory listing
     byte* TrackPtr = (byte*)pTrackBuffers[2].data();
-    UDWORD FileCount = readDWord(TrackPtr + 0x18);
+    UDWORD FileCount = readBEDWord(TrackPtr + 0x18);
 
     // Move to first file entry
     TrackPtr += 0x20;
     for (UDWORD Count = 0; Count < FileCount; ++Count) {
         std::string Filename((char*)TrackPtr);
-        UDWORD Filesize = readDWord(TrackPtr + 0x1C);
-
+        UDWORD Filesize = readBEDWord(TrackPtr + 0x1C);
         UBYTE FileTrack = *(TrackPtr + 0x1A);
         UBYTE FileBlock = *(TrackPtr + 0x1B);
-
-        std::string FileData;
 
         std::cout << std::setw(15) << Filename << "  Track: ";
         std::cout << std::setw(4) << ((size_t)FileTrack) << "  Block: ";
         std::cout << std::setw(3) << ((size_t)FileBlock) << "  Size: ";
         std::cout << std::setw(6) << ((size_t)Filesize) << " bytes\n";
 
+        std::string FileData;
+        // Read each block
         SDWORD FileRemaining = Filesize;
         while (FileRemaining > 0) {
             byte* FileTrackPtr = (byte*)pTrackBuffers[FileTrack].data();
             byte *FileTrackPtrEnd = (byte*)pTrackBuffers[FileTrack].data() + pTrackBuffers[FileTrack].size();
             FileTrackPtr += (FileBlock * 512);
 
-            if (FileTrackPtr > FileTrackPtrEnd || FileTrackPtr + 510 >= FileTrackPtrEnd) {
+            if (FileTrackPtr > FileTrackPtrEnd || (FileTrackPtr + 512) > FileTrackPtrEnd) {
                 std::cout << "  Track: " << ((size_t)FileTrack) << ": Read past end of available track data.\n\n";
                 break;
             }
