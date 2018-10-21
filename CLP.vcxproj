@@ -159,7 +159,7 @@
       <WarningLevel>Level3</WarningLevel>
       <MinimalRebuild>true</MinimalRebuild>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;CAPS_USER;LIB_USER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <ProgramDataBaseFileName>.\Debug\</ProgramDataBaseFileName>
@@ -220,7 +220,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="capsplug.cpp" />
     <ClCompile Include="SOS_Unpacker.cpp" />
     <ClCompile Include="StdAfx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -234,11 +233,15 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <Library Include="CAPSImg.lib" />
+  </ItemGroup>
+  <ItemGroup>
     <ClInclude Include="CapsAPI.h" />
+    <ClInclude Include="CapsFDC.h" />
+    <ClInclude Include="CapsForm.h" />
     <ClInclude Include="CapsLib.h" />
-    <ClInclude Include="CapsPlug.h" />
-    <ClInclude Include="Comlib.h" />
-    <ClInclude Include="Comtype.h" />
+    <ClInclude Include="CapsLibAll.h" />
+    <ClInclude Include="CommonTypes.h" />
     <ClInclude Include="StdAfx.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

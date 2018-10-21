@@ -1,30 +1,28 @@
-#ifndef CAPSLIB_H
-#define CAPSLIB_H
 
-#undef LIB_USER
-#ifdef CAPS_USER
-#define LIB_USER
-#endif
-#include "comlib.h"
-
-ExtSub SDWORD __cdecl CAPSInit();
-ExtSub SDWORD __cdecl CAPSExit();
-ExtSub SDWORD __cdecl CAPSAddImage();
-ExtSub SDWORD __cdecl CAPSRemImage(SDWORD id);
-ExtSub SDWORD __cdecl CAPSLockImage(SDWORD id, PCHAR name);
-ExtSub SDWORD __cdecl CAPSLockImageMemory(SDWORD id, PUBYTE buffer, UDWORD length, UDWORD flag);
-ExtSub SDWORD __cdecl CAPSUnlockImage(SDWORD id);
-ExtSub SDWORD __cdecl CAPSLoadImage(SDWORD id, UDWORD flag);
-ExtSub SDWORD __cdecl CAPSGetImageInfo(PCAPSIMAGEINFO pi, SDWORD id);
-ExtSub SDWORD __cdecl CAPSLockTrack(PCAPSTRACKINFO pi, SDWORD id, UDWORD cylinder, UDWORD head, UDWORD flag);
-ExtSub SDWORD __cdecl CAPSUnlockTrack(SDWORD id, UDWORD cylinder, UDWORD head);
-ExtSub SDWORD __cdecl CAPSUnlockAllTracks(SDWORD id);
-ExtSub PCHAR  __cdecl CAPSGetPlatformName(UDWORD pid);
-ExtSub SDWORD __cdecl CAPSGetVersionInfo(PCAPSVERSIONINFO pi, UDWORD flag);
-
-ExtSub SDWORD __cdecl CAPSGetInfo(PVOID pinfo, SDWORD id, UDWORD cylinder, UDWORD head, UDWORD inftype, UDWORD infid);
-ExtSub SDWORD __cdecl CAPSSetRevolution(SDWORD id, UDWORD value);
-ExtSub SDWORD __cdecl CAPSGetImageType(PCHAR name);
-ExtSub SDWORD __cdecl CAPSGetImageTypeMemory(PUBYTE buffer, UDWORD length);
-ExtSub SDWORD __cdecl CAPSGetDebugRequest();
-#endif
+extern "C" __declspec(dllimport) SDWORD __cdecl CAPSInit();
+extern "C" __declspec(dllimport) SDWORD __cdecl CAPSExit();
+extern "C" __declspec(dllimport) SDWORD __cdecl CAPSAddImage();
+extern "C" __declspec(dllimport) SDWORD __cdecl CAPSRemImage(SDWORD id);
+extern "C" __declspec(dllimport) SDWORD __cdecl CAPSLockImage(SDWORD id, PCHAR name);
+extern "C" __declspec(dllimport) SDWORD __cdecl CAPSLockImageMemory(SDWORD id, PUBYTE buffer, UDWORD length, UDWORD flag);
+extern "C" __declspec(dllimport) SDWORD __cdecl CAPSUnlockImage(SDWORD id);
+extern "C" __declspec(dllimport) SDWORD __cdecl CAPSLoadImage(SDWORD id, UDWORD flag);
+extern "C" __declspec(dllimport) SDWORD __cdecl CAPSGetImageInfo(PCAPSIMAGEINFO pi, SDWORD id);
+extern "C" __declspec(dllimport) SDWORD __cdecl CAPSLockTrack(PVOID ptrackinfo, SDWORD id, UDWORD cylinder, UDWORD head, UDWORD flag);
+extern "C" __declspec(dllimport) SDWORD __cdecl CAPSUnlockTrack(SDWORD id, UDWORD cylinder, UDWORD head);
+extern "C" __declspec(dllimport) SDWORD __cdecl CAPSUnlockAllTracks(SDWORD id);
+extern "C" __declspec(dllimport) PCHAR  __cdecl CAPSGetPlatformName(UDWORD pid);
+extern "C" __declspec(dllimport) SDWORD __cdecl CAPSGetVersionInfo(PVOID pversioninfo, UDWORD flag);
+extern "C" __declspec(dllimport) UDWORD __cdecl CAPSFdcGetInfo(SDWORD iid, PCAPSFDC pc, SDWORD ext);
+extern "C" __declspec(dllimport) SDWORD __cdecl CAPSFdcInit(PCAPSFDC pc);
+extern "C" __declspec(dllimport) void   __cdecl CAPSFdcReset(PCAPSFDC pc);
+extern "C" __declspec(dllimport) void   __cdecl CAPSFdcEmulate(PCAPSFDC pc, UDWORD cyclecnt);
+extern "C" __declspec(dllimport) UDWORD __cdecl CAPSFdcRead(PCAPSFDC pc, UDWORD address);
+extern "C" __declspec(dllimport) void   __cdecl CAPSFdcWrite(PCAPSFDC pc, UDWORD address, UDWORD data);
+extern "C" __declspec(dllimport) SDWORD __cdecl CAPSFdcInvalidateTrack(PCAPSFDC pc, SDWORD drive);
+extern "C" __declspec(dllimport) SDWORD __cdecl CAPSFormatDataToMFM(PVOID pformattrack, UDWORD flag);
+extern "C" __declspec(dllimport) SDWORD __cdecl CAPSGetInfo(PVOID pinfo, SDWORD id, UDWORD cylinder, UDWORD head, UDWORD inftype, UDWORD infid);
+extern "C" __declspec(dllimport) SDWORD __cdecl CAPSSetRevolution(SDWORD id, UDWORD value);
+extern "C" __declspec(dllimport) SDWORD __cdecl CAPSGetImageType(PCHAR name);
+extern "C" __declspec(dllimport) SDWORD __cdecl CAPSGetImageTypeMemory(PUBYTE buffer, UDWORD length);
+extern "C" __declspec(dllimport) SDWORD __cdecl CAPSGetDebugRequest();

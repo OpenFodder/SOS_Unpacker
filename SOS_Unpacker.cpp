@@ -5,18 +5,6 @@
 #include "stdafx.h"
 #include "windows.h"
 
-#include "ComType.h"
-#include "CapsAPI.h"
-
-#include "CapsPlug.h"
-
-#include <iostream>
-#include <iomanip>
-#include <string>
-#include <vector>
-#include <fstream>
-#include <map>
-
 const char gPathSeperator = (_WIN32 ? '\\' : '/');
 
 const int gCapsFlags = DI_LOCK_DENVAR | DI_LOCK_DENNOISE | DI_LOCK_NOISE | DI_LOCK_UPDATEFD | DI_LOCK_TYPE | DI_LOCK_OVLBIT | DI_LOCK_TRKBIT;
@@ -144,18 +132,18 @@ void tool_EndianSwap(UINT8 *pBuffer, size_t pSize) {
 std::vector<std::string> GetSOSTracks(const std::string& pFilename) {
     CapsImageInfo CapsImageInfo;
 
-    int CapsID = CapsAddImage();
+    int CapsID = CAPSAddImage();
 
     // lock this image into the container
-    auto ret = CapsLockImage(CapsID, (PCHAR) pFilename.c_str());
+    auto ret = CAPSLockImage(CapsID, (PCHAR) pFilename.c_str());
     if (ret != imgeOk) {
-        CapsRemImage(CapsID);
+        CAPSRemImage(CapsID);
         return {};
     }
 
     // get some information about the image
-    CapsGetImageInfo(&CapsImageInfo, CapsID);
-    CapsLoadImage(CapsID, gCapsFlags);
+    CAPSGetImageInfo(&CapsImageInfo, CapsID);
+    CAPSLoadImage(CapsID, gCapsFlags);
 
     auto MaxTracks = (CapsImageInfo.maxcylinder - CapsImageInfo.mincylinder + 1) *  (CapsImageInfo.maxhead - CapsImageInfo.minhead + 1);
 
@@ -171,7 +159,7 @@ std::vector<std::string> GetSOSTracks(const std::string& pFilename) {
         TrackInfo.type = ctitNoise;
 
         // SOS has the sides inverted
-        auto Data = CapsLockTrack((PCAPSTRACKINFO)&TrackInfo, CapsID, Track / 2, (Track & 1) ? 0 : 1, gCapsFlags);
+        auto Data = CAPSLockTrack((PCAPSTRACKINFO)&TrackInfo, CapsID, Track / 2, (Track & 1) ? 0 : 1, gCapsFlags);
         
         FullTrack.resize(TrackInfo.tracklen / 8);
         memcpy((UINT16*)FullTrack.data(), TrackInfo.trackbuf, TrackInfo.tracklen / 8);
@@ -221,9 +209,9 @@ std::vector<std::string> GetSOSTracks(const std::string& pFilename) {
         TrackBuffers[Track] = std::string((char*)TrackData, TrackDecodedBuffer.size() * 4);
     }
 
-    CapsUnlockAllTracks(CapsID);
-    CapsUnlockImage(CapsID);
-    CapsRemImage(CapsID);
+    CAPSUnlockAllTracks(CapsID);
+    CAPSUnlockImage(CapsID);
+    CAPSRemImage(CapsID);
 
     return TrackBuffers;
 }
@@ -284,37 +272,39 @@ int main(int argc, char* argv[]) {
     std::cout << "SOS Unpacker\n";
     std::cout << "https://github.com/OpenFodder\n\n";
 
-    if (CapsInit("CAPSImg.dll")) {
+    if (CAPSInit()) {
         std::cout << "CAPSImg.dll not found\n";
     } else {
 
-        std::cout << "Finding .raw files\n";
-        auto Files = local_DirectoryList(".", ".raw");
-
-        if (!Files.size())
-            std::cout << "No .raw files found\n";
-
         system("mkdir out");
 
-        //local_DirectoryList
-        for (auto& File : Files) {
-            std::cout << "\nLoading " << File << "\n";
-            auto Tracks = GetSOSTracks(File);
+        for (auto& extension : { ".raw", ".ipf" } ) {
+            std::cout << "Finding " << extension << " files\n";
+            auto Files = local_DirectoryList(".", extension);
 
-            if (!Tracks.size()) {
-                std::cout << "No Tracks found in file: " << File << "\n";
-                continue;
+            if (!Files.size())
+                std::cout << "No " << extension << " files found\n";
+
+            //local_DirectoryList
+            for (auto& File : Files) {
+                std::cout << "\nLoading " << File << "\n";
+                auto Tracks = GetSOSTracks(File);
+
+                if (!Tracks.size()) {
+                    std::cout << "No Tracks found in file: " << File << "\n";
+                    continue;
+                }
+
+
+                std::cout << "Extracting to .\\out\\...\n";
+                ExtractFiles(Tracks, "out");
             }
-
-
-            std::cout << "Extracting to .\\out\\...\n";
-            ExtractFiles(Tracks, "out");
         }
     }
 
     std::cout << "Press enter to finish\n";
     std::cin.get();
 
-    CapsExit();
+    CAPSExit();
 	return 0;
 }

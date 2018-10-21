@@ -1,21 +1,17 @@
-#ifndef COMTYPE_H
-#define COMTYPE_H
+#ifndef COMMONTYPES_H
+#define COMMONTYPES_H
 
 typedef void *PVOID;
-typedef BYTE *PBYTE;
-typedef WORD *PWORD;
-typedef DWORD *PDWORD;
 typedef char *PCHAR;
-typedef long IOREG;
 
-typedef unsigned char UBYTE;
-typedef unsigned short UWORD;
-typedef unsigned long UDWORD;
-typedef unsigned __int64 UQUAD;
-typedef signed char SBYTE;
-typedef signed short SWORD;
-typedef signed long SDWORD;
-typedef signed __int64 SQUAD;
+typedef uint8_t UBYTE;
+typedef uint16_t UWORD;
+typedef uint32_t UDWORD;
+typedef uint64_t UQUAD;
+typedef int8_t SBYTE;
+typedef int16_t SWORD;
+typedef int32_t SDWORD;
+typedef int64_t SQUAD;
 
 typedef UBYTE *PUBYTE;
 typedef UWORD *PUWORD;
@@ -26,25 +22,8 @@ typedef SWORD *PSWORD;
 typedef SDWORD *PSDWORD;
 typedef SQUAD *PSQUAD;
 
-#define UCHAR_MIN 0
-#define USHRT_MIN 0
-#define ULONG_MIN 0
-
-#define UBYTE_MIN UCHAR_MIN
-#define UBYTE_MAX UCHAR_MAX
-#define UWORD_MIN USHRT_MIN
-#define UWORD_MAX USHRT_MAX
-#define UDWORD_MIN ULONG_MIN
-#define UDWORD_MAX ULONG_MAX
-#define SBYTE_MIN SCHAR_MIN
-#define SBYTE_MAX SCHAR_MAX
-#define SWORD_MIN SHRT_MIN
-#define SWORD_MAX SHRT_MAX
-#define SDWORD_MIN LONG_MIN
-#define SDWORD_MAX LONG_MAX
-
 enum {
-	DB_0,
+	DB_0 = 0,
 	DB_1,
 	DB_2,
 	DB_3,
@@ -117,9 +96,9 @@ enum {
 #define Naked __declspec(naked)
 
 #ifdef _DEBUG
- #define NODEFAULT   ASSERT(0)
+#define NODEFAULT   assert(0)
 #else
- #define NODEFAULT   __assume(0)
+#define NODEFAULT   __assume(0)
 #endif
 
 #endif

@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="capsplug.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="StdAfx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -26,19 +23,25 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <Library Include="CAPSImg.lib" />
+  </ItemGroup>
+  <ItemGroup>
     <ClInclude Include="CapsAPI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CapsFDC.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CapsForm.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CapsLib.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CapsPlug.h">
+    <ClInclude Include="CapsLibAll.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Comlib.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Comtype.h">
+    <ClInclude Include="CommonTypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="StdAfx.h">

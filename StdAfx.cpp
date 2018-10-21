@@ -4,10 +4,7 @@
 
 #include "stdafx.h"
 
-#include <sstream>
-
 #ifdef WIN32
-#include "Windows.h"
 #include <direct.h>
 
 std::vector<std::string> local_DirectoryList(const std::string& pPath, const std::string& pExtension) {
@@ -19,15 +16,15 @@ std::vector<std::string> local_DirectoryList(const std::string& pPath, const std
     _getcwd(path, 2000);
 
     // Build the file path
-    std::stringstream finalPath;
+    std::string finalPath;
 
     if (pPath.size())
-        finalPath << pPath;
+        finalPath += pPath;
 
-    finalPath << "/*" << pExtension;
+    finalPath += "/*";
+    finalPath += pExtension;
 
-
-    if ((dhandle = FindFirstFile(finalPath.str().c_str(), &fdata)) == INVALID_HANDLE_VALUE) {
+    if ((dhandle = FindFirstFile(finalPath.c_str(), &fdata)) == INVALID_HANDLE_VALUE) {
         return results;
     }
 
@@ -73,9 +70,11 @@ std::vector<std::string> local_DirectoryList(const std::string& pPath, const std
     std::vector<std::string>		  results;
 
     // Build the file path
-    std::stringstream finalPath;
 
-    finalPath << pPath << "/";
+    std::string finalPath;
+
+    finalPath += pPath;
+    finalPath += "/";
 
     findType = pExtension;
 
