@@ -5,7 +5,11 @@
 #include "stdafx.h"
 #include "windows.h"
 
-const char gPathSeperator = (_WIN32 ? '\\' : '/');
+#ifdef _WIN32
+const char gPathSeperator = '\\';
+#else
+const char gPathSeperator = '/';
+#endif
 
 const int gCapsFlags = DI_LOCK_DENVAR | DI_LOCK_DENNOISE | DI_LOCK_NOISE | DI_LOCK_UPDATEFD | DI_LOCK_TYPE | DI_LOCK_OVLBIT | DI_LOCK_TRKBIT;
 const UWORD gTrackSyncMarker = 0x4489;
