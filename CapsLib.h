@@ -1,4 +1,5 @@
 
+#ifdef WIN32
 extern "C" __declspec(dllimport) SDWORD __cdecl CAPSInit();
 extern "C" __declspec(dllimport) SDWORD __cdecl CAPSExit();
 extern "C" __declspec(dllimport) SDWORD __cdecl CAPSAddImage();
@@ -26,3 +27,22 @@ extern "C" __declspec(dllimport) SDWORD __cdecl CAPSSetRevolution(SDWORD id, UDW
 extern "C" __declspec(dllimport) SDWORD __cdecl CAPSGetImageType(PCHAR name);
 extern "C" __declspec(dllimport) SDWORD __cdecl CAPSGetImageTypeMemory(PUBYTE buffer, UDWORD length);
 extern "C" __declspec(dllimport) SDWORD __cdecl CAPSGetDebugRequest();
+#else
+	extern "C" {
+	SDWORD CAPSInit(void);
+	SDWORD CAPSExit(void);
+	SDWORD CAPSAddImage(void);
+	SDWORD CAPSRemImage(SDWORD id);
+	SDWORD CAPSLockImage(SDWORD id, char *name);
+	SDWORD CAPSLockImageMemory(SDWORD id, PUBYTE *buffer, UDWORD length, UDWORD flag);
+	SDWORD CAPSUnlockImage(SDWORD id);
+	SDWORD CAPSLoadImage(SDWORD id, UDWORD flag);
+	SDWORD CAPSGetImageInfo(struct CapsImageInfo *pi, SDWORD id);
+	SDWORD CAPSLockTrack(void *ptrackinfo, SDWORD id, UDWORD cylinder, UDWORD head, UDWORD flag);
+	SDWORD CAPSUnlockTrack(SDWORD id, UDWORD cylinder, UDWORD head);
+	SDWORD CAPSUnlockAllTracks(SDWORD id);
+	char *CAPSGetPlatformName(UDWORD pid);
+	SDWORD CAPSGetVersionInfo(void *pversioninfo, UDWORD flag);
+	SDWORD CAPSGetInfo(void *pinfo, SDWORD id, UDWORD cylinder, UDWORD head, UDWORD inftype, UDWORD infid);
+	}
+#endif

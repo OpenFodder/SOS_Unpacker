@@ -3,9 +3,9 @@
 // www.caps-project.org
 
 #include "stdafx.h"
-#include "windows.h"
-
+#include<string.h>
 #ifdef _WIN32
+#include "windows.h"
 const char gPathSeperator = '\\';
 #else
 const char gPathSeperator = '/';
@@ -39,10 +39,10 @@ UDWORD swapDWord(UDWORD buffer) {
     return (DW[0] << 16) + (DW[1]);
 }
 
-void trackbuffer_shift_bits(byte **pBuffer, int d0, int d1) {
+void trackbuffer_shift_bits(UBYTE **pBuffer, int d0, int d1) {
     d0 -= 1;
     if (d0 >= 0) {
-        byte *buffer = *pBuffer;
+        UBYTE *buffer = *pBuffer;
         buffer += d1; buffer += d1;
         d1 -= 2;
 
@@ -76,7 +76,7 @@ void trackbuffer_shift_bits(byte **pBuffer, int d0, int d1) {
         *pBuffer += 2;
 }
 
-int sectorFindSync(byte **pBuffer, byte *pBufferEnd) {
+int sectorFindSync(UBYTE **pBuffer, UBYTE *pBufferEnd) {
     UDWORD	bits_shifted = 0;
     bool	found = false;
 
@@ -103,7 +103,7 @@ int sectorFindSync(byte **pBuffer, byte *pBufferEnd) {
     return (16 - bits_shifted);
 }
 
-UDWORD sos_ReadUDWord(byte*&pEven, byte*& pOdd) {
+UDWORD sos_ReadUDWord(UBYTE*&pEven, UBYTE*& pOdd) {
     UDWORD D0 = *(UDWORD*)pEven;
     UDWORD D1 = *(UDWORD*)pOdd;
 
@@ -119,14 +119,14 @@ UDWORD sos_ReadUDWord(byte*&pEven, byte*& pOdd) {
     return swapDWord(D0);
 }
 
-void tool_EndianSwap(UINT8 *pBuffer, size_t pSize) {
-    UINT8 *pDest = pBuffer;
+void tool_EndianSwap(UBYTE *pBuffer, size_t pSize) {
+    UBYTE *pDest = pBuffer;
 
     pSize /= 2;
 
     while (pSize--) {
-        UINT8 al = *pBuffer++;
-        UINT8 ah = *pBuffer++;
+        UBYTE al = *pBuffer++;
+        UBYTE ah = *pBuffer++;
 
         *pDest++ = ah;
         *pDest++ = al;
@@ -141,6 +141,7 @@ std::vector<std::string> GetSOSTracks(const std::string& pFilename) {
     // lock this image into the container
     auto ret = CAPSLockImage(CapsID, (PCHAR) pFilename.c_str());
     if (ret != imgeOk) {
+		std::cout << "Bad Image: " << ret << "\n";
         CAPSRemImage(CapsID);
         return {};
     }
@@ -166,11 +167,11 @@ std::vector<std::string> GetSOSTracks(const std::string& pFilename) {
         auto Data = CAPSLockTrack((PCAPSTRACKINFO)&TrackInfo, CapsID, Track / 2, (Track & 1) ? 0 : 1, gCapsFlags);
         
         FullTrack.resize(TrackInfo.tracklen / 8);
-        memcpy((UINT16*)FullTrack.data(), TrackInfo.trackbuf, TrackInfo.tracklen / 8);
-        tool_EndianSwap((UINT8*)FullTrack.data(), FullTrack.size());
+        memcpy((UWORD*)FullTrack.data(), TrackInfo.trackbuf, TrackInfo.tracklen / 8);
+        tool_EndianSwap((UBYTE*)FullTrack.data(), FullTrack.size());
 
-        byte* Ptr = (byte*)FullTrack.data();
-        byte* PtrEnd = (byte*)FullTrack.data() + FullTrack.size();
+        UBYTE* Ptr = (UBYTE*)FullTrack.data();
+        UBYTE* PtrEnd = (UBYTE*)FullTrack.data() + FullTrack.size();
 
         // Find the track start marker
         auto SkipBits = sectorFindSync(&Ptr, Ptr + FullTrack.size());
@@ -180,7 +181,7 @@ std::vector<std::string> GetSOSTracks(const std::string& pFilename) {
         }
         trackbuffer_shift_bits(&Ptr, SkipBits, (int)((PtrEnd - Ptr) / 2) - 8);
 
-        byte* PtrOdd = Ptr + 0x180c;
+        UBYTE* PtrOdd = Ptr + 0x180c;
         if (PtrOdd > PtrEnd) {
             std::cout << "Skipping Track " << Track << "\n";
             continue;
@@ -208,7 +209,7 @@ std::vector<std::string> GetSOSTracks(const std::string& pFilename) {
         }
 
         // Track CRC Matches
-        byte* TrackData = (byte*)TrackDecodedBuffer.data();
+        UBYTE* TrackData = (UBYTE*)TrackDecodedBuffer.data();
         tool_EndianSwap(TrackData, TrackDecodedBuffer.size() * 4);
         TrackBuffers[Track] = std::string((char*)TrackData, TrackDecodedBuffer.size() * 4);
     }
@@ -223,7 +224,7 @@ std::vector<std::string> GetSOSTracks(const std::string& pFilename) {
 void ExtractFiles(const std::vector<std::string> pTrackBuffers, const std::string& pTargetFolder) {
 
     // Track3 is the directory listing
-    byte* TrackPtr = (byte*)pTrackBuffers[2].data();
+    UBYTE* TrackPtr = (UBYTE*)pTrackBuffers[2].data();
     UDWORD FileCount = readBEDWord(TrackPtr + 0x18);
 
     // Move to first file entry
@@ -243,8 +244,8 @@ void ExtractFiles(const std::vector<std::string> pTrackBuffers, const std::strin
         // Read each block
         SDWORD FileRemaining = Filesize;
         while (FileRemaining > 0) {
-            byte* FileTrackPtr = (byte*)pTrackBuffers[FileTrack].data();
-            byte *FileTrackPtrEnd = (byte*)pTrackBuffers[FileTrack].data() + pTrackBuffers[FileTrack].size();
+            UBYTE* FileTrackPtr = (UBYTE*)pTrackBuffers[FileTrack].data();
+            UBYTE *FileTrackPtrEnd = (UBYTE*)pTrackBuffers[FileTrack].data() + pTrackBuffers[FileTrack].size();
             FileTrackPtr += (FileBlock * 512);
 
             if (FileTrackPtr > FileTrackPtrEnd || (FileTrackPtr + 512) > FileTrackPtrEnd) {
