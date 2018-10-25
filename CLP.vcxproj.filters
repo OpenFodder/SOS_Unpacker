@@ -15,10 +15,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="StdAfx.cpp">
+    <ClCompile Include="SOS_Unpacker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SOS_Unpacker.cpp">
+    <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
