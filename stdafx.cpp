@@ -52,12 +52,13 @@ std::vector<std::string> local_DirectoryList(const std::string& pPath, const std
 
 #else
 #include <dirent.h>
+#include <algorithm>
 std::string findType;
 
 int file_select(const struct dirent *entry) {
     std::string name = entry->d_name;
 
-    transform(name.begin(), name.end(), name.begin(), ::toupper);
+    std::transform(name.begin(), name.end(), name.begin(), ::toupper);
 
     if (name.find(findType) == std::string::npos)
         return false;
@@ -80,7 +81,7 @@ std::vector<std::string> local_DirectoryList(const std::string& pPath, const std
 
     transform(findType.begin(), findType.end(), findType.begin(), ::toupper);
 
-    int count = scandir(finalPath.str().c_str(), (dirent***)&directFiles, file_select, 0);
+    int count = scandir(finalPath.c_str(), (dirent***)&directFiles, file_select, 0);
 
     for (int i = 0; i < count; ++i) {
 
@@ -89,7 +90,7 @@ std::vector<std::string> local_DirectoryList(const std::string& pPath, const std
 
     transform(findType.begin(), findType.end(), findType.begin(), ::tolower);
 
-    count = scandir(finalPath.str().c_str(), (dirent***)&directFiles, file_select, 0);
+    count = scandir(finalPath.c_str(), (dirent***)&directFiles, file_select, 0);
 
     for (int i = 0; i < count; ++i) {
 
