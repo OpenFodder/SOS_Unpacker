@@ -14,7 +14,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <assert.h>
-#include <vector>
+#include <algorithm>
 
 #ifdef WIN32
 #include "Windows.h"
@@ -29,6 +29,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <time.h>			// localtime
+
 #define MAX_PATH ( 260 )
 #define _access access
 #ifndef __MINGW32__

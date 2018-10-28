@@ -1,7 +1,5 @@
 #include "stdafx.h"
 
-
-
 CDiskImageFactory::CDiskImageFactory()
 {
 	// dummy objects to initialize static variables
