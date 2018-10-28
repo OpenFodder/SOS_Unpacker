@@ -159,7 +159,7 @@
       <WarningLevel>Level3</WarningLevel>
       <MinimalRebuild>true</MinimalRebuild>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;CAPS_USER;LIB_USER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <ProgramDataBaseFileName>.\Debug\</ProgramDataBaseFileName>
@@ -220,6 +220,25 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="capsimg\CAPSImg\CapsAPI.cpp" />
+    <ClCompile Include="capsimg\CAPSImg\CapsFDCEmulator.cpp" />
+    <ClCompile Include="capsimg\CAPSImg\CapsFile.cpp" />
+    <ClCompile Include="capsimg\CAPSImg\CapsFormatMFM.cpp" />
+    <ClCompile Include="capsimg\CAPSImg\CapsImage.cpp" />
+    <ClCompile Include="capsimg\CAPSImg\CapsImageStd.cpp" />
+    <ClCompile Include="capsimg\CAPSImg\CapsLoader.cpp" />
+    <ClCompile Include="capsimg\CAPSImg\DiskImage.cpp" />
+    <ClCompile Include="capsimg\CAPSImg\DiskImageFactory.cpp" />
+    <ClCompile Include="capsimg\CAPSImg\StreamCueImage.cpp" />
+    <ClCompile Include="capsimg\CAPSImg\StreamImage.cpp" />
+    <ClCompile Include="capsimg\Codec\CTRawCodec.cpp" />
+    <ClCompile Include="capsimg\Codec\CTRawCodecDecompressor.cpp" />
+    <ClCompile Include="capsimg\Codec\DiskEncoding.cpp" />
+    <ClCompile Include="capsimg\Core\BaseFile.cpp" />
+    <ClCompile Include="capsimg\Core\BitBuffer.cpp" />
+    <ClCompile Include="capsimg\Core\CRC.cpp" />
+    <ClCompile Include="capsimg\Core\DiskFile.cpp" />
+    <ClCompile Include="capsimg\Core\MemoryFile.cpp" />
     <ClCompile Include="SOS_Unpacker.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -233,16 +252,41 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Library Include="CAPSImg.lib" />
+    <ClInclude Include="capsimg\CAPSImg\CapsCore.h" />
+    <ClInclude Include="capsimg\CAPSImg\CapsFDCEmulator.h" />
+    <ClInclude Include="capsimg\CAPSImg\CapsFile.h" />
+    <ClInclude Include="capsimg\CAPSImg\CapsFormatMFM.h" />
+    <ClInclude Include="capsimg\CAPSImg\CapsImage.h" />
+    <ClInclude Include="capsimg\CAPSImg\CapsImageStd.h" />
+    <ClInclude Include="capsimg\CAPSImg\CapsLoader.h" />
+    <ClInclude Include="capsimg\CAPSImg\DiskImage.h" />
+    <ClInclude Include="capsimg\CAPSImg\DiskImageFactory.h" />
+    <ClInclude Include="capsimg\CAPSImg\resource.h" />
+    <ClInclude Include="capsimg\CAPSImg\StreamCueImage.h" />
+    <ClInclude Include="capsimg\CAPSImg\StreamImage.h" />
+    <ClInclude Include="capsimg\CAPSImg\targetver.h" />
+    <ClInclude Include="capsimg\Codec\CapsDefinitions.h" />
+    <ClInclude Include="capsimg\Codec\CTRawCodec.h" />
+    <ClInclude Include="capsimg\Codec\DiskEncoding.h" />
+    <ClInclude Include="capsimg\Core\BaseFile.h" />
+    <ClInclude Include="capsimg\Core\BitBuffer.h" />
+    <ClInclude Include="capsimg\Core\CommonTypes.h" />
+    <ClInclude Include="capsimg\Core\CRC.h" />
+    <ClInclude Include="capsimg\Core\DiskFile.h" />
+    <ClInclude Include="capsimg\Core\MemoryFile.h" />
+    <ClInclude Include="capsimg\LibIPF\CapsAPI.h" />
+    <ClInclude Include="capsimg\LibIPF\CapsFDC.h" />
+    <ClInclude Include="capsimg\LibIPF\CapsForm.h" />
+    <ClInclude Include="capsimg\LibIPF\CapsLib.h" />
+    <ClInclude Include="capsimg\LibIPF\CapsLibAll.h" />
+    <ClInclude Include="capsimg\LibIPF\CapsLibVersion.h" />
+    <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CapsAPI.h" />
-    <ClInclude Include="CapsFDC.h" />
-    <ClInclude Include="CapsForm.h" />
-    <ClInclude Include="CapsLib.h" />
-    <ClInclude Include="CapsLibAll.h" />
-    <ClInclude Include="CommonTypes.h" />
-    <ClInclude Include="StdAfx.h" />
+    <None Include="capsimg\CAPSImg\CAPSImg.aps" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="capsimg\CAPSImg\CAPSImg.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

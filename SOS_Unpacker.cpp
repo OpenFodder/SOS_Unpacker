@@ -160,7 +160,7 @@ std::vector<std::string> GetSOSTracks(const std::string& pFilename) {
     // Track 2 is the first SOS track
     for (UDWORD Track = 2; Track < MaxTracks; ++Track) {
         std::string FullTrack;
-        CapsTrackInfoT2 TrackInfo;
+        CapsTrackInfoT1 TrackInfo;
         TrackInfo.type = ctitNoise;
 
         // SOS has the sides inverted
