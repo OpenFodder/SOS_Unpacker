@@ -9,8 +9,6 @@ compiler:
 env:
   - LLVM_VERSION=3.8.1
      
-before_install: 
-  - sudo apt-get update
 cache:
   directories:
     - ${TRAVIS_BUILD_DIR}/deps/llvm-3.8.1
