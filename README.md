@@ -1,4 +1,5 @@
 # SOS Unpacker
+[![Build Status](https://api.travis-ci.org/OpenFodder/SOS_Unpacker.svg?branch=master)](https://travis-ci.org/OpenFodder/SOS_Unpacker)
 
 Unpack files protected by Sensible Operating System disk protection from disks imaged in the [Kryoflux "CT RAW"](https://blog.legacymode.com/2018/09/09/floppy-disk-archiving/) and [IPF](http://www.softpres.org/glossary:ipf) format.
 
