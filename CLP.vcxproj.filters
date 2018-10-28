@@ -5,13 +5,24 @@
       <UniqueIdentifier>{c7b532bb-3491-4bd5-82c0-e877d69870cb}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
     </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{cd1c6642-7256-41f0-93c8-8807afac0c9b}</UniqueIdentifier>
-      <Extensions>h;hpp;hxx;hm;inl</Extensions>
-    </Filter>
     <Filter Include="Resource Files">
       <UniqueIdentifier>{e46ae754-7f6d-4344-9c2d-0d98e62373a9}</UniqueIdentifier>
       <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
+    </Filter>
+    <Filter Include="CAPS">
+      <UniqueIdentifier>{7ea9ff56-a566-4b70-a38a-ef9f70008a0d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CAPS\Core">
+      <UniqueIdentifier>{de472b55-f2fb-4c29-94c4-6fd1c45432ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CAPS\Codec">
+      <UniqueIdentifier>{4bbdf526-38a3-4641-b85d-7c5abe7a4538}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CAPS\CAPSImg">
+      <UniqueIdentifier>{caf63598-6244-40d1-86a2-7c88f2d5e9ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CAPS\LibIBP">
+      <UniqueIdentifier>{4e96ee5d-43a9-4e87-8b85-77d604851b3c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -21,31 +32,161 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="capsimg\Core\BaseFile.cpp">
+      <Filter>CAPS\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="capsimg\Core\BitBuffer.cpp">
+      <Filter>CAPS\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="capsimg\Core\CRC.cpp">
+      <Filter>CAPS\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="capsimg\Core\DiskFile.cpp">
+      <Filter>CAPS\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="capsimg\Core\MemoryFile.cpp">
+      <Filter>CAPS\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="capsimg\Codec\CTRawCodec.cpp">
+      <Filter>CAPS\Codec</Filter>
+    </ClCompile>
+    <ClCompile Include="capsimg\Codec\CTRawCodecDecompressor.cpp">
+      <Filter>CAPS\Codec</Filter>
+    </ClCompile>
+    <ClCompile Include="capsimg\Codec\DiskEncoding.cpp">
+      <Filter>CAPS\Codec</Filter>
+    </ClCompile>
+    <ClCompile Include="capsimg\CAPSImg\CapsAPI.cpp">
+      <Filter>CAPS\CAPSImg</Filter>
+    </ClCompile>
+    <ClCompile Include="capsimg\CAPSImg\CapsFDCEmulator.cpp">
+      <Filter>CAPS\CAPSImg</Filter>
+    </ClCompile>
+    <ClCompile Include="capsimg\CAPSImg\CapsFile.cpp">
+      <Filter>CAPS\CAPSImg</Filter>
+    </ClCompile>
+    <ClCompile Include="capsimg\CAPSImg\CapsFormatMFM.cpp">
+      <Filter>CAPS\CAPSImg</Filter>
+    </ClCompile>
+    <ClCompile Include="capsimg\CAPSImg\CapsImage.cpp">
+      <Filter>CAPS\CAPSImg</Filter>
+    </ClCompile>
+    <ClCompile Include="capsimg\CAPSImg\CapsImageStd.cpp">
+      <Filter>CAPS\CAPSImg</Filter>
+    </ClCompile>
+    <ClCompile Include="capsimg\CAPSImg\CapsLoader.cpp">
+      <Filter>CAPS\CAPSImg</Filter>
+    </ClCompile>
+    <ClCompile Include="capsimg\CAPSImg\DiskImage.cpp">
+      <Filter>CAPS\CAPSImg</Filter>
+    </ClCompile>
+    <ClCompile Include="capsimg\CAPSImg\DiskImageFactory.cpp">
+      <Filter>CAPS\CAPSImg</Filter>
+    </ClCompile>
+    <ClCompile Include="capsimg\CAPSImg\StreamCueImage.cpp">
+      <Filter>CAPS\CAPSImg</Filter>
+    </ClCompile>
+    <ClCompile Include="capsimg\CAPSImg\StreamImage.cpp">
+      <Filter>CAPS\CAPSImg</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Library Include="CAPSImg.lib" />
+    <ClInclude Include="capsimg\Core\BaseFile.h">
+      <Filter>CAPS\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="capsimg\Core\BitBuffer.h">
+      <Filter>CAPS\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="capsimg\Core\CommonTypes.h">
+      <Filter>CAPS\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="capsimg\Core\CRC.h">
+      <Filter>CAPS\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="capsimg\Core\DiskFile.h">
+      <Filter>CAPS\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="capsimg\Core\MemoryFile.h">
+      <Filter>CAPS\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="capsimg\Codec\CapsDefinitions.h">
+      <Filter>CAPS\Codec</Filter>
+    </ClInclude>
+    <ClInclude Include="capsimg\Codec\CTRawCodec.h">
+      <Filter>CAPS\Codec</Filter>
+    </ClInclude>
+    <ClInclude Include="capsimg\Codec\DiskEncoding.h">
+      <Filter>CAPS\Codec</Filter>
+    </ClInclude>
+    <ClInclude Include="capsimg\CAPSImg\CapsCore.h">
+      <Filter>CAPS\CAPSImg</Filter>
+    </ClInclude>
+    <ClInclude Include="capsimg\CAPSImg\CapsFDCEmulator.h">
+      <Filter>CAPS\CAPSImg</Filter>
+    </ClInclude>
+    <ClInclude Include="capsimg\CAPSImg\CapsFile.h">
+      <Filter>CAPS\CAPSImg</Filter>
+    </ClInclude>
+    <ClInclude Include="capsimg\CAPSImg\CapsFormatMFM.h">
+      <Filter>CAPS\CAPSImg</Filter>
+    </ClInclude>
+    <ClInclude Include="capsimg\CAPSImg\CapsImage.h">
+      <Filter>CAPS\CAPSImg</Filter>
+    </ClInclude>
+    <ClInclude Include="capsimg\CAPSImg\CapsImageStd.h">
+      <Filter>CAPS\CAPSImg</Filter>
+    </ClInclude>
+    <ClInclude Include="capsimg\CAPSImg\CapsLoader.h">
+      <Filter>CAPS\CAPSImg</Filter>
+    </ClInclude>
+    <ClInclude Include="capsimg\CAPSImg\DiskImage.h">
+      <Filter>CAPS\CAPSImg</Filter>
+    </ClInclude>
+    <ClInclude Include="capsimg\CAPSImg\DiskImageFactory.h">
+      <Filter>CAPS\CAPSImg</Filter>
+    </ClInclude>
+    <ClInclude Include="capsimg\CAPSImg\resource.h">
+      <Filter>CAPS\CAPSImg</Filter>
+    </ClInclude>
+    <ClInclude Include="capsimg\CAPSImg\StreamCueImage.h">
+      <Filter>CAPS\CAPSImg</Filter>
+    </ClInclude>
+    <ClInclude Include="capsimg\CAPSImg\StreamImage.h">
+      <Filter>CAPS\CAPSImg</Filter>
+    </ClInclude>
+    <ClInclude Include="capsimg\CAPSImg\targetver.h">
+      <Filter>CAPS\CAPSImg</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="capsimg\LibIPF\CapsAPI.h">
+      <Filter>CAPS\LibIBP</Filter>
+    </ClInclude>
+    <ClInclude Include="capsimg\LibIPF\CapsFDC.h">
+      <Filter>CAPS\LibIBP</Filter>
+    </ClInclude>
+    <ClInclude Include="capsimg\LibIPF\CapsForm.h">
+      <Filter>CAPS\LibIBP</Filter>
+    </ClInclude>
+    <ClInclude Include="capsimg\LibIPF\CapsLib.h">
+      <Filter>CAPS\LibIBP</Filter>
+    </ClInclude>
+    <ClInclude Include="capsimg\LibIPF\CapsLibAll.h">
+      <Filter>CAPS\LibIBP</Filter>
+    </ClInclude>
+    <ClInclude Include="capsimg\LibIPF\CapsLibVersion.h">
+      <Filter>CAPS\LibIBP</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CapsAPI.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CapsFDC.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CapsForm.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CapsLib.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CapsLibAll.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CommonTypes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="StdAfx.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
+    <None Include="capsimg\CAPSImg\CAPSImg.aps">
+      <Filter>CAPS\CAPSImg</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="capsimg\CAPSImg\CAPSImg.rc">
+      <Filter>CAPS\CAPSImg</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>
